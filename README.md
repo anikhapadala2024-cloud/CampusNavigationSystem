@@ -100,8 +100,8 @@ flowchart LR
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/anikhapadala2024-cloud/2520030613-1stTerm3CFAIProject.git
-cd 2520030613-1stTerm3CFAIProject
+git clone https://github.com/anikhapadala2024-cloud/CampusNavigationSystem.git
+cd CampusNavigationSystem
 
 # 2. Install dependencies
 pip install -r requirements.txt
