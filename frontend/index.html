@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏫 KL Campus Navigator</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sidebar-bg: #1a237e;
+      --sidebar-dark: #0d1757;
+      --accent: #42a5f5;
+      --accent2: #26c6da;
+      --success: #66bb6a;
+      --danger: #ef5350;
+      --warn: #ffa726;
+      --text-light: #e8eaf6;
+      --text-muted: #9fa8da;
+      --card-bg: #283593;
+      --white: #ffffff;
+      --shadow: 0 4px 20px rgba(0,0,0,.35);
+    }
+
+    html, body { height: 100%; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
+
+    body {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      background: #0d1757;
+    }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 360px;
+      min-width: 320px;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+      z-index: 999;
+    }
+
+    /* Header */
+    .sidebar-header {
+      background: var(--sidebar-dark);
+      padding: 22px 20px 18px;
+      text-align: center;
+      border-bottom: 2px solid rgba(66,165,245,.3);
+    }
+    .sidebar-header h1 { color: var(--white); font-size: 1.35rem; letter-spacing:.5px; }
+    .sidebar-header .subtitle {
+      color: var(--accent);
+      font-size: .78rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 4px;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .subtitle .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent2);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { transform:scale(1); opacity:1; }
+      50%      { transform:scale(1.4); opacity:.6; }
+    }
+
+    /* Content area */
+    .sidebar-content { padding: 18px 16px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+
+    /* Section card */
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+    .card-title {
+      color: var(--accent);
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    /* Dropdowns */
+    .form-group { margin-bottom: 10px; }
+    .form-group label {
+      display: block;
+      color: var(--text-muted);
+      font-size: .75rem;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .form-group select {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--sidebar-dark);
+      color: var(--white);
+      border: 1.5px solid rgba(66,165,245,.3);
+      border-radius: 7px;
+      font-size: .88rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color .2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%2342a5f5'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    .form-group select:focus { border-color: var(--accent); }
+    .form-group select option { background: #1a237e; }
+
+    /* Buttons */
+    .btn-group { display: flex; flex-direction: column; gap: 8px; }
+
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 16px;
+      border: none; border-radius: 8px;
+      font-size: .88rem; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+      letter-spacing: .3px;
+    }
+    .btn:active { transform: scale(.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1976d2, #42a5f5);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(66,165,245,.4);
+    }
+    .btn-primary:hover { background: linear-gradient(135deg, #1565c0, #2196f3); box-shadow: 0 4px 14px rgba(66,165,245,.55); }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #283593, #3949ab);
+      color: #e8eaf6;
+      border: 1px solid rgba(66,165,245,.25);
+    }
+    .btn-secondary:hover { background: linear-gradient(135deg, #1a237e, #283593); }
+
+    .btn-success {
+      background: linear-gradient(135deg, #2e7d32, #66bb6a);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(102,187,106,.35);
+    }
+    .btn-success:hover { background: linear-gradient(135deg, #1b5e20, #4caf50); }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #b71c1c, #ef5350);
+      color: #fff;
+    }
+    .btn-danger:hover { background: linear-gradient(135deg, #7f0000, #c62828); }
+
+    /* Spinner */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2.5px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    .btn.loading .spinner { display: inline-block; }
+    .btn.loading .btn-icon { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Results panel */
+    #results-panel {
+      display: none;
+      animation: fadeSlideIn .35s ease;
+    }
+    @keyframes fadeSlideIn {
+      from { opacity:0; transform:translateY(-8px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .result-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(66,165,245,.12);
+      font-size: .83rem;
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-label { color: var(--text-muted); min-width: 110px; }
+    .result-value { color: var(--white); font-weight: 600; text-align: right; word-break: break-word; }
+    .result-path { color: var(--accent2); }
+    .result-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 20px;
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+    }
+    .badge-astar { background: rgba(66,165,245,.2); color: var(--accent); border:1px solid var(--accent); }
+
+    /* Comparison Table */
+    #compare-panel {
+      display: none;
+      animation: fadeSlideIn .35s ease;
+    }
+
+    .compare-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    .compare-table th {
+      background: var(--sidebar-dark);
+      color: var(--accent);
+      padding: 7px 8px;
+      text-align: left;
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .compare-table td {
+      padding: 7px 8px;
+      color: var(--text-light);
+      border-bottom: 1px solid rgba(66,165,245,.1);
+      vertical-align: middle;
+    }
+    .compare-table tr:hover td { background: rgba(66,165,245,.07); }
+    .winner-row td { background: rgba(66,165,245,.1) !important; }
+    .winner-badge {
+      background: linear-gradient(135deg, #1976d2, #42a5f5);
+      color: #fff; padding: 2px 7px; border-radius: 20px;
+      font-size: .68rem; font-weight: 700; text-transform: uppercase;
+    }
+
+    /* Toast */
+    #toast-container {
+      position: fixed; top: 18px; right: 18px;
+      z-index: 10000; display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      padding: 12px 18px; border-radius: 8px;
+      font-size: .85rem; font-weight: 500;
+      color: #fff; box-shadow: var(--shadow);
+      animation: toastIn .3s ease, toastOut .3s ease 2.7s forwards;
+      max-width: 280px;
+    }
+    .toast-error   { background: linear-gradient(135deg, #b71c1c, #ef5350); }
+    .toast-success { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
+    .toast-info    { background: linear-gradient(135deg, #1565c0, #42a5f5); }
+
+    @keyframes toastIn  { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:none; } }
+    @keyframes toastOut { from { opacity:1; } to { opacity:0; transform:translateX(30px); } }
+
+    /* Map container */
+    #map-container {
+      flex: 1;
+      position: relative;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Map overlay loader */
+    #map-loader {
+      position: absolute; inset: 0;
+      background: rgba(13,23,87,.7);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 500; flex-direction: column; gap: 12px;
+    }
+    #map-loader.active { display: flex; }
+    .map-loader-ring {
+      width: 48px; height: 48px;
+      border: 4px solid rgba(255,255,255,.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    #map-loader p { color: var(--accent); font-size: .85rem; letter-spacing: 1px; }
+
+    /* Status bar */
+    .status-bar {
+      background: var(--sidebar-dark);
+      padding: 8px 16px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: .72rem; color: var(--text-muted);
+      border-top: 1px solid rgba(66,165,245,.15);
+    }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+    .status-dot.offline { background: var(--danger); }
+
+    /* Scrollbar */
+    #sidebar::-webkit-scrollbar { width: 5px; }
+    #sidebar::-webkit-scrollbar-track { background: transparent; }
+    #sidebar::-webkit-scrollbar-thumb { background: rgba(66,165,245,.3); border-radius: 4px; }
+
+    /* Legend */
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: .75rem; color: var(--text-muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; }
+    .legend-dot.blue   { background: rgba(66,165,245,.4); border-color: #42a5f5; }
+    .legend-dot.green  { background: rgba(102,187,106,.4); border-color: #66bb6a; }
+    .legend-dot.red    { background: rgba(239,83,80,.4);   border-color: #ef5350; }
+    .legend-line { width: 18px; height: 3px; background: #42a5f5; border-radius: 2px; }
+
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      #sidebar { width: 100%; min-width: unset; height: 55vh; }
+      #map-container { height: 45vh; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>🏫 KL Campus Navigator</h1>
+    <div class="subtitle">
+      <span class="dot"></span>
+      AI-Powered Pathfinding
+      <span class="dot"></span>
+    </div>
+  </div>
+
+  <div class="sidebar-content">
+
+    <!-- Route Selection -->
+    <div class="card">
+      <div class="card-title">📍 Select Route</div>
+      <div class="form-group">
+        <label>From</label>
+        <select id="from-select">
+          <option value="">— Loading locations… —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>To</label>
+        <select id="to-select">
+          <option value="">— Loading locations… —</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card">
+      <div class="card-title">⚡ Actions</div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-find" onclick="findRoute()">
+          <span class="btn-icon">🔍</span>
+          <span class="spinner"></span>
+          Find Route (A*)
+        </button>
+        <button class="btn btn-secondary" id="btn-compare" onclick="compareAlgorithms()">
+          <span class="btn-icon">📊</span>
+          <span class="spinner"></span>
+          Compare Algorithms
+        </button>
+        <button class="btn btn-success" id="btn-cafeteria" onclick="findNearestCafeteria()">
+          <span class="btn-icon">☕</span>
+          <span class="spinner"></span>
+          Find Nearest Cafeteria
+        </button>
+        <button class="btn btn-danger" onclick="clearMap()">
+          🗑️ Clear Map
+        </button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="card" id="results-panel">
+      <div class="card-title">✅ Route Result</div>
+      <div id="result-rows"></div>
+    </div>
+
+    <!-- Algorithm Comparison -->
+    <div class="card" id="compare-panel">
+      <div class="card-title">📊 Algorithm Comparison</div>
+      <div style="overflow-x:auto;">
+        <table class="compare-table" id="compare-table">
+          <thead>
+            <tr>
+              <th>Algorithm</th>
+              <th>Cost</th>
+              <th>Nodes</th>
+              <th>Path Length</th>
+            </tr>
+          </thead>
+          <tbody id="compare-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="card">
+      <div class="card-title">🗺️ Map Legend</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot blue"></div> Landmark</div>
+        <div class="legend-item"><div class="legend-dot green"></div> Start</div>
+        <div class="legend-item"><div class="legend-dot red"></div> End</div>
+        <div class="legend-item"><div class="legend-line"></div> Route</div>
+      </div>
+    </div>
+
+  </div><!-- /sidebar-content -->
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Connecting to backend…</span>
+  </div>
+</div><!-- /sidebar -->
+
+<!-- ══════════════ MAP ══════════════ -->
+<div id="map-container">
+  <div id="map-loader">
+    <div class="map-loader-ring"></div>
+    <p>Computing path…</p>
+  </div>
+  <div id="map"></div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- ══════════════ SCRIPT ══════════════ -->
+<script>
+/* ─── Config ─── */
+const API = 'http://localhost:8000';
+
+const LANDMARKS = {
+  'Main Gate':         [16.4414, 80.6207],
+  'Library':           [16.4421, 80.6218],
+  'Cafeteria':         [16.4418, 80.6225],
+  'Lab Complex':       [16.4425, 80.6220],
+  'Admin Block':       [16.4430, 80.6215],
+  'Classroom Block A': [16.4423, 80.6210],
+  'Classroom Block B': [16.4426, 80.6205],
+  'Auditorium':        [16.4432, 80.6228],
+  'Sports Ground':     [16.4408, 80.6230],
+  'Hostel Block':      [16.4410, 80.6200],
+  'Medical Center':    [16.4416, 80.6212],
+  'Workshop':          [16.4428, 80.6235],
+};
+
+/* ─── Map Init ─── */
+const map = L.map('map', { zoomControl: true }).setView([16.4421, 80.6215], 17);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
+
+/* ─── State ─── */
+let routeLayer   = null;
+let startMarker  = null;
+let endMarker    = null;
+const landmarkMarkers = {};
+
+/* ─── Custom Icons ─── */
+function circleIcon(color, label) {
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:28px;height:28px;border-radius:50%;
+      background:${color};border:3px solid #fff;
+      box-shadow:0 2px 8px rgba(0,0,0,.5);
+      display:flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:700;color:#fff;
+      cursor:pointer;">${label}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -14],
+  });
+}
+
+/* ─── Add Landmark Markers ─── */
+function addLandmarkMarkers() {
+  for (const [name, coords] of Object.entries(LANDMARKS)) {
+    const abbrev = name.split(' ').map(w => w[0]).join('').slice(0, 2);
+    const m = L.marker(coords, { icon: circleIcon('rgba(66,165,245,0.85)', abbrev) })
+      .bindPopup(`<b style="color:#1a237e">${name}</b><br><small>${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}</small>`)
+      .addTo(map);
+    landmarkMarkers[name] = m;
+  }
+}
+addLandmarkMarkers();
+
+/* ─── Toast ─── */
+function showToast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+/* ─── Loader helpers ─── */
+function setMapLoader(on) {
+  document.getElementById('map-loader').classList.toggle('active', on);
+}
+function setBtnLoading(id, on) {
+  document.getElementById(id).classList.toggle('loading', on);
+}
+
+/* ─── Status bar ─── */
+async function checkBackend() {
+  try {
+    const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      document.getElementById('status-dot').classList.remove('offline');
+      const d = await r.json();
+      document.getElementById('status-text').textContent =
+        `Backend online · ${d.locations_count ?? '?'} locations loaded`;
+      return true;
+    }
+  } catch {}
+  document.getElementById('status-dot').classList.add('offline');
+  document.getElementById('status-text').textContent = 'Backend offline — start uvicorn main:app';
+  return false;
+}
+
+/* ─── Load locations → dropdowns ─── */
+async function loadLocations() {
+  try {
+    const r = await fetch(`${API}/locations`);
+    if (!r.ok) throw new Error(r.statusText);
+    const data = await r.json();
+    const names = data.locations || data; // handle both shapes
+    ['from-select', 'to-select'].forEach((id, i) => {
+      const sel = document.getElementById(id);
+      sel.innerHTML = `<option value="">— Select ${i === 0 ? 'Origin' : 'Destination'} —</option>`;
+      names.forEach(n => {
+        const opt = document.createElement('option');
+        opt.value = opt.textContent = n;
+        sel.appendChild(opt);
+      });
+    });
+    showToast(`${names.length} locations loaded`, 'success');
+  } catch (err) {
+    // Fall back to LANDMARKS keys
+    const names = Object.keys(LANDMARKS);
+    ['from-select', 'to-select'].forEach((id, i) => {
+      const sel = document.getElementById(id);
+      sel.innerHTML = `<option value="">— Select ${i === 0 ? 'Origin' : 'Destination'} —</option>`;
+      names.forEach(n => {
+        const opt = document.createElement('option');
+        opt.value = opt.textContent = n;
+        sel.appendChild(opt);
+      });
+    });
+    showToast('Using offline locations (backend unreachable)', 'info');
+  }
+}
+
+/* ─── Clear map ─── */
+function clearMap() {
+  if (routeLayer)  { map.removeLayer(routeLayer);  routeLayer = null; }
+  if (startMarker) { map.removeLayer(startMarker); startMarker = null; }
+  if (endMarker)   { map.removeLayer(endMarker);   endMarker = null; }
+  document.getElementById('results-panel').style.display  = 'none';
+  document.getElementById('compare-panel').style.display  = 'none';
+  showToast('Map cleared', 'info');
+}
+
+/* ─── Draw animated polyline ─── */
+function drawAnimatedPolyline(latlngs) {
+  if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
+
+  const pts = [...latlngs];
+  let idx = 1;
+  const drawn = [pts[0]];
+
+  routeLayer = L.polyline(drawn, {
+    color: '#42a5f5', weight: 5, opacity: .9,
+    dashArray: '8,4', lineJoin: 'round',
+  }).addTo(map);
+
+  const timer = setInterval(() => {
+    if (idx >= pts.length) { clearInterval(timer); return; }
+    drawn.push(pts[idx++]);
+    routeLayer.setLatLngs(drawn);
+  }, 80);
+
+  map.fitBounds(L.latLngBounds(latlngs), { padding: [60, 60] });
+}
+
+/* ─── Place start / end markers ─── */
+function placeEndpoints(start, end) {
+  if (startMarker) map.removeLayer(startMarker);
+  if (endMarker)   map.removeLayer(endMarker);
+  if (LANDMARKS[start]) {
+    startMarker = L.marker(LANDMARKS[start], { icon: circleIcon('#66bb6a', 'S') })
+      .bindPopup(`<b>Start:</b> ${start}`).addTo(map).openPopup();
+  }
+  if (LANDMARKS[end]) {
+    endMarker = L.marker(LANDMARKS[end], { icon: circleIcon('#ef5350', 'E') })
+      .bindPopup(`<b>End:</b> ${end}`).addTo(map);
+  }
+}
+
+/* ─── Render result rows ─── */
+function renderResult(data) {
+  const path = data.path || [];
+  const pathStr = path.join(' → ');
+  const dist = data.distance_metres ?? data.cost ?? '?';
+  const time = data.estimated_walk_time_minutes
+    ? data.estimated_walk_time_minutes.toFixed(1)
+    : typeof dist === 'number' ? (dist / 80 / 60 * 1000).toFixed(1) : '?';
+  const nodes = data.nodes_expanded ?? '?';
+  const algo  = data.algorithm ?? 'A*';
+
+  document.getElementById('result-rows').innerHTML = `
+    <div class="result-row">
+      <span class="result-label">Route</span>
+      <span class="result-value result-path" style="font-size:.78rem">${pathStr}</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Distance</span>
+      <span class="result-value">${typeof dist === 'number' ? dist.toFixed(1) + ' m' : dist}</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Walk Time</span>
+      <span class="result-value">${time} min</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Nodes Expanded</span>
+      <span class="result-value">${nodes}</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Algorithm</span>
+      <span class="result-value"><span class="result-badge badge-astar">${algo}</span></span>
+    </div>
+  `;
+  document.getElementById('results-panel').style.display = 'block';
+}
+
+/* ─── Find Route (A*) ─── */
+async function findRoute() {
+  const from = document.getElementById('from-select').value;
+  const to   = document.getElementById('to-select').value;
+  if (!from || !to) { showToast('Please select both From and To locations', 'error'); return; }
+  if (from === to)  { showToast('Origin and destination cannot be the same', 'error'); return; }
+
+  setBtnLoading('btn-find', true);
+  setMapLoader(true);
+
+  try {
+    const r = await fetch(`${API}/navigate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ start: from, destination: to }),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || r.statusText);
+    }
+    const data = await r.json();
+
+    if (!data.path || data.path.length === 0) {
+      showToast('No path found between these locations', 'error'); return;
+    }
+
+    const latlngs = data.path.map(name => LANDMARKS[name]).filter(Boolean);
+    placeEndpoints(from, to);
+    drawAnimatedPolyline(latlngs);
+    renderResult(data);
+    showToast(`Route found! ${data.distance_metres?.toFixed(0) ?? '?'} m via A*`, 'success');
+
+  } catch (err) {
+    showToast(`Error: ${err.message}`, 'error');
+  } finally {
+    setBtnLoading('btn-find', false);
+    setMapLoader(false);
+  }
+}
+
+/* ─── Compare Algorithms ─── */
+async function compareAlgorithms() {
+  const from = document.getElementById('from-select').value;
+  const to   = document.getElementById('to-select').value;
+  if (!from || !to) { showToast('Please select both From and To locations', 'error'); return; }
+
+  setBtnLoading('btn-compare', true);
+  setMapLoader(true);
+
+  try {
+    const r = await fetch(`${API}/compare`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ start: from, destination: to }),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || r.statusText);
+    }
+    const data = await r.json();
+    // data: { "A*": {path, cost, nodes_expanded}, "Dijkstra": {...}, ... }
+    renderComparison(data);
+    showToast('Algorithm comparison complete', 'success');
+
+  } catch (err) {
+    showToast(`Error: ${err.message}`, 'error');
+  } finally {
+    setBtnLoading('btn-compare', false);
+    setMapLoader(false);
+  }
+}
+
+function renderComparison(data) {
+  const ORDER = ['A*', 'Dijkstra', 'BFS', 'DFS'];
+  const tbody = document.getElementById('compare-tbody');
+  tbody.innerHTML = '';
+
+  ORDER.forEach(algo => {
+    const d = data[algo] || {};
+    const isWinner = algo === 'A*';
+    const pathLen = Array.isArray(d.path) ? d.path.length : '?';
+    const cost = typeof d.cost === 'number' ? d.cost.toFixed(1) : (d.cost ?? '?');
+    const nodes = d.nodes_expanded ?? '?';
+
+    const tr = document.createElement('tr');
+    if (isWinner) tr.classList.add('winner-row');
+    tr.innerHTML = `
+      <td>
+        ${isWinner ? `<span class="winner-badge">★ Best</span> ` : ''}
+        <strong>${algo}</strong>
+      </td>
+      <td>${cost}${algo !== 'BFS' && typeof d.cost === 'number' ? ' m' : ''}</td>
+      <td>${nodes}</td>
+      <td>${pathLen} hops</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('compare-panel').style.display = 'block';
+}
+
+/* ─── Find Nearest Cafeteria ─── */
+async function findNearestCafeteria() {
+  const from = document.getElementById('from-select').value;
+  if (!from) { showToast('Please select your current location (From)', 'error'); return; }
+
+  setBtnLoading('btn-cafeteria', true);
+  setMapLoader(true);
+
+  try {
+    const r = await fetch(`${API}/nearest_cafeteria?start=${encodeURIComponent(from)}`);
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || r.statusText);
+    }
+    const data = await r.json();
+
+    if (!data.path || data.path.length === 0) {
+      showToast('No path to cafeteria found', 'error'); return;
+    }
+
+    const latlngs = data.path.map(n => LANDMARKS[n]).filter(Boolean);
+    placeEndpoints(from, 'Cafeteria');
+    drawAnimatedPolyline(latlngs);
+    renderResult({ ...data, algorithm: 'A* (Cafeteria)' });
+    showToast(`Nearest cafeteria: ${data.distance_metres?.toFixed(0) ?? '?'} m away`, 'success');
+
+  } catch (err) {
+    showToast(`Error: ${err.message}`, 'error');
+  } finally {
+    setBtnLoading('btn-cafeteria', false);
+    setMapLoader(false);
+  }
+}
+
+/* ─── Init ─── */
+(async () => {
+  await checkBackend();
+  await loadLocations();
+})();
+</script>
+</body>
+</html>

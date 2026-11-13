@@ -1,249 +1,176 @@
-# 🎓 Campus Navigation System
+# 🏫 KL Campus Navigation System
 
-<div align="center">
+![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)
+![A* Search](https://img.shields.io/badge/Algorithm-A*%20Search-FF6B35?style=flat-square)
+![Leaflet.js](https://img.shields.io/badge/Map-Leaflet.js-199900?style=flat-square&logo=leaflet&logoColor=white)
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge\&logo=python)
-![AI](https://img.shields.io/badge/Artificial%20Intelligence-A*-green?style=for-the-badge)
-![Graph](https://img.shields.io/badge/Graph-Based%20Navigation-orange?style=for-the-badge)
-![Status](https://img.shields.io/badge/Project-Completed-success?style=for-the-badge)
+> An intelligent campus navigation web app for **KL University (Vaddeswaram, AP)** that finds the shortest walking path between campus landmarks using the A\* pathfinding algorithm, visualised on an interactive map.
 
-### 🚀 Intelligent Campus Navigation Assistant
-
-*An AI-powered system that finds the optimal route inside a university campus using A* Search Algorithm.*
-
-</div>
+Built as CFAI Term 3 Project | **2520030613** | KL University
 
 ---
 
-## 📖 Abstract
+## ✨ Features
 
-The Campus Navigation System is an intelligent AI-based navigation assistant designed to help students, faculty, and visitors efficiently navigate a university campus. The system models the campus as a graph where locations such as classrooms, laboratories, libraries, cafeterias, and administrative offices are represented as nodes, while pathways connecting them are represented as edges.
-
-Using Artificial Intelligence search techniques, the system computes optimal routes based on distance, travel time, and accessibility constraints. The project demonstrates graph-based knowledge representation, heuristic search, explainable reasoning, and performance evaluation.
-
----
-
-## 🎯 Objectives
-
-✅ Model a campus as a graph
-
-✅ Find shortest paths between locations
-
-✅ Apply AI search algorithms
-
-✅ Generate explainable route traces
-
-✅ Analyze algorithm performance
+- 🗺️ **Interactive Map** — Real KL University campus map rendered with Leaflet.js; click to set source & destination
+- 🚀 **A\* Pathfinding** — Optimal shortest-path search using GPS-calibrated Haversine heuristic
+- 📊 **Algorithm Comparison** — Side-by-side comparison of A\*, Dijkstra, BFS, and DFS on the same query
+- ⏱️ **Walking Time Estimate** — Automatic ETA at average walking speed (1.4 m/s ≈ 5 km/h)
+- 📍 **Nearest Amenity Finder** — One-click "Find nearest cafeteria / medical center / hostel" feature
+- 🔍 **Step-by-Step Trace** — Expandable panel showing every node A\* opened and its f/g scores
+- 🌐 **REST API** — Clean FastAPI backend; integrate with any frontend or mobile app
 
 ---
 
-## 🏫 Campus Map
+## 📁 Project Structure
 
-```text
-Gate
-├── Library
-│   ├── Lab
-│   └── Admin
+```
+2520030613-1stTerm3CFAIProject-main/
 │
-└── Cafeteria
-    └── Lab
-
-Lab
-└── Classroom
-
-Admin
-└── Classroom
-```
-# 🎓 Campus Navigation System
-
-![Campus](https://images.unsplash.com/photo-1562774053-701939374585)
-
-An AI-powered navigation assistant for university campuses.
----
-
-## 🧠 AI Concepts Used
-
-### CO1
-
-* PEAS Model
-* Problem Formulation
-* State Space Representation
-* Graph Knowledge Representation
-
-### CO2
-
-* BFS
-* DFS
-* Uniform Cost Search
-* Greedy Search
-* A* Search Algorithm
-
-### CO3
-
-* Constraint Satisfaction Concepts
-* Accessibility Constraints
-* Route Restrictions
-
-### CO4
-
-* Utility-Based Decision Making
-* Optimal Route Selection
-
-### CO5
-
-* Probabilistic Reasoning
-* Uncertainty Handling
-
-### CO6
-
-* Hybrid AI System
-* Explainable AI
-* Performance Analysis
-
----
-
-## ⚙️ Technologies Used
-
-| Technology | Purpose               |
-| ---------- | --------------------- |
-| Python     | Programming Language  |
-| Heap Queue | Priority Queue        |
-| Graphs     | Campus Representation |
-| A* Search  | Path Finding          |
-| GitHub     | Version Control       |
-
----
-
-## 🔍 Algorithm Used
-
-### A* Search Algorithm
-
-The A* algorithm combines:
-
-```text
-f(n) = g(n) + h(n)
-```
-
-Where:
-
-* g(n) = Actual path cost
-* h(n) = Heuristic estimate
-* f(n) = Total estimated cost
-
-This helps find the shortest route efficiently.
-
----
-
-## ▶️ Sample Output
-
-```text
-===================================
-AI CAMPUS NAVIGATION SYSTEM
-===================================
-
-Enter Starting Location: Gate
-Enter Destination Location: Classroom
-
-OPTIMAL PATH FOUND
-
-Route:
-Gate -> Library -> Lab -> Classroom
-
-Total Distance:
-9
-
-Nodes Expanded:
-4
-```
-
----
-
-## 📊 Features
-
-✨ Shortest Path Calculation
-
-✨ Graph-Based Navigation
-
-✨ Explainable Search Trace
-
-✨ Heuristic Route Planning
-
-✨ Performance Metrics
-
-✨ User-Friendly Interface
-
----
-
-## 📂 Project Structure
-
-```text
-Campus-Navigation-System
+├── app/                        # Core Python package
+│   ├── __init__.py
+│   ├── landmarks.py            # 12 KL University GPS coordinates
+│   ├── heuristics.py           # Haversine distance + heuristic factory
+│   ├── graph.py                # Campus adjacency graph builder (≤ 400 m edges)
+│   ├── astar.py                # A* search implementation
+│   └── algorithms.py           # Dijkstra, BFS, DFS implementations
 │
-├── main.py
-├── README.md
-└── requirements.txt
-```
-
----
-
-## 🚀 How to Run
-
-### Clone Repository
-
-```bash
-git clone https://github.com/yourusername/Campus-Navigation-System.git
-```
-
-### Run Program
-
-```bash
-python main.py
-```
-
----
-
-## 📸 Screenshots
-
-Upload screenshots into a folder named **images**.
-
-```text
-Campus-Navigation-System
+├── api/                        # FastAPI application layer
+│   ├── __init__.py
+│   └── routes.py               # All route handlers + CORS config
 │
-├── images
-│   ├── output1.png
-│   ├── output2.png
+├── frontend/                   # Static web UI
+│   └── index.html              # Interactive Leaflet.js map (single-page app)
 │
-├── main.py
+├── tests/                      # pytest test suite
+│   ├── __init__.py
+│   ├── test_astar.py           # A* algorithm tests
+│   ├── test_graph.py           # Graph builder & landmark tests
+│   └── test_algorithms.py      # Comparative algorithm tests
+│
+├── main.py                     # Uvicorn entry point
+├── requirements.txt            # Python dependencies
 └── README.md
 ```
-## 👩‍💻 Team Members
-
-| Name | Roll Number |
-|------|------------|
-| Kolavali Sanjana | 2520030614 |
-| Yerrolla Eekshitha | 2520030615 |
-| Padala Anikha | 2520030613 |
 
 ---
 
-## 📚 Course
+## ⚡ Quick Start
 
-**Course:** CFAI (Computational Foundations of Artificial Intelligence)
+### 1. Install dependencies
 
-**Semester:** Term-3 (1st year)
+```bash
+pip install -r requirements.txt
+```
 
-**Cource Code:** 25SC1306E
+### 2. Start the server
 
-**Project Title:** Campus Navigation System
+```bash
+uvicorn main:app --reload
+```
 
-**Academic Year:** 2025–26
+### 3. Open the app
+
+Navigate to **http://localhost:8000/frontend/index.html** in your browser.
 
 ---
 
-<div align="center">
+## 🔌 API Reference
 
-### 🌟 Thank You 🌟
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | Health check — returns `{"status": "ok"}` |
+| `GET` | `/health` | Detailed health status of all services |
+| `GET` | `/locations` | List all campus landmarks with GPS coordinates |
+| `POST` | `/navigate` | Find shortest path via A\*; returns path, cost, walk time, trace |
+| `POST` | `/compare` | Run A\*, Dijkstra, BFS, DFS on same query and compare results |
+| `GET` | `/nearest/{amenity}` | Find the nearest landmark matching the given amenity keyword |
 
-⭐ If you like this project, give it a star on GitHub ⭐
+### POST `/navigate` — Request body
 
-</div>
+```json
+{
+  "start": "Main Gate",
+  "end": "Library"
+}
+```
+
+### POST `/navigate` — Response
+
+```json
+{
+  "path": ["Main Gate", "Medical Center", "Library"],
+  "cost": 142.3,
+  "walk_time_seconds": 101,
+  "nodes_expanded": 5,
+  "trace": ["Expanded: Main Gate | g=0.0 | f=118.2", "..."]
+}
+```
+
+---
+
+## 📐 Algorithm Comparison
+
+| Algorithm | Time Complexity | Space Complexity | Optimal? | Complete? |
+|-----------|----------------|-----------------|----------|-----------|
+| **A\*** | O((V + E) log V) | O(V) | ✅ Yes (admissible h) | ✅ Yes |
+| **Dijkstra** | O((V + E) log V) | O(V) | ✅ Yes | ✅ Yes |
+| **BFS** | O(V + E) | O(V) | ⚠️ Hop-count only | ✅ Yes |
+| **DFS** | O(V + E) | O(V) | ❌ No | ⚠️ Finite graphs |
+
+> **Why A\*?** On the campus graph, A\* typically expands 30–50% fewer nodes than Dijkstra because the Haversine heuristic guides the search directly toward the goal, reducing wasted exploration.
+
+---
+
+## 🛠️ Technologies Used
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend** | Python 3.12, FastAPI 0.115, Uvicorn |
+| **Algorithms** | A\* Search, Dijkstra, BFS, DFS |
+| **Heuristic** | Haversine great-circle distance |
+| **Map / Frontend** | Leaflet.js, OpenStreetMap tiles, Vanilla JS |
+| **Data Validation** | Pydantic v2 |
+| **Testing** | pytest 8 |
+| **HTTP Client** | HTTPX (for API integration tests) |
+
+---
+
+## 🗺️ Campus Landmarks
+
+The system models **12 real KL University (Vaddeswaram) landmarks** with accurate GPS coordinates:
+
+| Landmark | Latitude | Longitude |
+|----------|----------|-----------|
+| Main Gate | 16.4414 | 80.6207 |
+| Library | 16.4421 | 80.6218 |
+| Cafeteria | 16.4418 | 80.6225 |
+| Lab Complex | 16.4425 | 80.6220 |
+| Admin Block | 16.4430 | 80.6215 |
+| Classroom Block A | 16.4423 | 80.6210 |
+| Classroom Block B | 16.4426 | 80.6205 |
+| Auditorium | 16.4432 | 80.6228 |
+| Sports Ground | 16.4408 | 80.6230 |
+| Hostel Block | 16.4410 | 80.6200 |
+| Medical Center | 16.4416 | 80.6212 |
+| Workshop | 16.4428 | 80.6235 |
+
+---
+
+## 🧪 Running Tests
+
+```bash
+pytest tests/ -v
+```
+
+Expected output: **15 tests passing** across 3 test modules.
+
+---
+
+## 👨‍🎓 Academic Context
+
+> **Built as CFAI Term 3 Project | 2520030613 | KL University**
+>
+> *Computer Fundamentals and AI (CFAI) — 1st Year, Term 3*
+> *K L University, Vaddeswaram, Guntur, Andhra Pradesh — 2024–25*
