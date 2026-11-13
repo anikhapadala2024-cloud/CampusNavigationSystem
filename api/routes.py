@@ -33,7 +33,12 @@ if os.path.isdir(_frontend_dir):
 
 class NavigationRequest(BaseModel):
     start: str
-    destination: str
+    destination: Optional[str] = None
+    end: Optional[str] = None
+
+    @property
+    def target(self) -> str:
+        return (self.destination or self.end or "").strip()
 
 
 # ---------------------------------------------------------------------------
@@ -87,14 +92,15 @@ def locations():
 def navigate(req: NavigationRequest):
     graph = get_campus_graph()
     landmarks = get_landmarks()
+    destination = req.target
 
-    if req.start not in graph:
+    if not req.start or req.start not in graph:
         raise HTTPException(status_code=404, detail=f"Start location '{req.start}' not found.")
-    if req.destination not in graph:
-        raise HTTPException(status_code=404, detail=f"Destination '{req.destination}' not found.")
+    if not destination or destination not in graph:
+        raise HTTPException(status_code=404, detail=f"Destination '{destination}' not found.")
 
-    heuristic = make_heuristic(req.destination, landmarks)
-    path, distance, nodes_expanded, trace = a_star(graph, heuristic, req.start, req.destination)
+    heuristic = make_heuristic(destination, landmarks)
+    path, distance, nodes_expanded, trace = a_star(graph, heuristic, req.start, destination)
 
     if path is None:
         raise HTTPException(status_code=404, detail="No path found between the given locations.")
@@ -120,17 +126,18 @@ def navigate(req: NavigationRequest):
 def compare(req: NavigationRequest):
     graph = get_campus_graph()
     landmarks = get_landmarks()
+    destination = req.target
 
-    if req.start not in graph:
+    if not req.start or req.start not in graph:
         raise HTTPException(status_code=404, detail=f"Start location '{req.start}' not found.")
-    if req.destination not in graph:
-        raise HTTPException(status_code=404, detail=f"Destination '{req.destination}' not found.")
+    if not destination or destination not in graph:
+        raise HTTPException(status_code=404, detail=f"Destination '{destination}' not found.")
 
     results = {}
 
     # A*
-    heuristic = make_heuristic(req.destination, landmarks)
-    path_a, cost_a, exp_a, _ = a_star(graph, heuristic, req.start, req.destination)
+    heuristic = make_heuristic(destination, landmarks)
+    path_a, cost_a, exp_a, _ = a_star(graph, heuristic, req.start, destination)
     results["A*"] = {
         "path": path_a,
         "cost": round(cost_a, 1) if cost_a is not None else None,
@@ -139,7 +146,7 @@ def compare(req: NavigationRequest):
     }
 
     # Dijkstra
-    path_d, cost_d, exp_d = dijkstra(graph, req.start, req.destination)
+    path_d, cost_d, exp_d = dijkstra(graph, req.start, destination)
     results["Dijkstra"] = {
         "path": path_d,
         "cost": round(cost_d, 1) if cost_d is not None else None,
@@ -148,7 +155,7 @@ def compare(req: NavigationRequest):
     }
 
     # BFS — cost is hops
-    path_b, cost_b, exp_b = bfs(graph, req.start, req.destination)
+    path_b, cost_b, exp_b = bfs(graph, req.start, destination)
     results["BFS"] = {
         "path": path_b,
         "cost": cost_b,  # integer hops, no rounding needed
@@ -157,7 +164,7 @@ def compare(req: NavigationRequest):
     }
 
     # DFS
-    path_df, cost_df, exp_df = dfs(graph, req.start, req.destination)
+    path_df, cost_df, exp_df = dfs(graph, req.start, destination)
     results["DFS"] = {
         "path": path_df,
         "cost": round(cost_df, 1) if cost_df is not None else None,
