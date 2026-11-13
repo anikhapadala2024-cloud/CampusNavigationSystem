@@ -1,5 +1,9 @@
 # 🏫 KL Campus Navigation System
 
+<p align="center">
+  <img src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80" alt="KL Campus" width="100%" style="border-radius: 8px;" />
+</p>
+
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![A* Search](https://img.shields.io/badge/Algorithm-A*%20Search-FF6B35?style=flat-square)
@@ -7,7 +11,25 @@
 
 > An intelligent campus navigation web app for **KL University (Vaddeswaram, AP)** that finds the shortest walking path between campus landmarks using the A\* pathfinding algorithm, visualised on an interactive map.
 
-Built as CFAI Term 3 Project | **2520030613** | KL University
+---
+
+## 👩‍💻 Team Members
+
+| Name | Roll Number |
+|------|------------|
+| **Padala Anikha** | 2520030613 |
+| **Kolavali Sanjana** | 2520030614 |
+| **Yerrolla Eekshitha** | 2520030615 |
+
+---
+
+## 📚 Course Details
+
+- **Course:** Computational Foundations of Artificial Intelligence (CFAI)
+- **Course Code:** 25SC1306E
+- **Semester:** Term-3 (1st Year)
+- **Institution:** KL University (KLEF), Vaddeswaram, Guntur, AP
+- **Academic Year:** 2025–26
 
 ---
 
