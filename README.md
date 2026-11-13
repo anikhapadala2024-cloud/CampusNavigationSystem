@@ -205,5 +205,11 @@ pytest tests/ -v
 ---
 
 <div align="center">
+  <sub> ⭐If you like our project do give a star⭐</sub>
+</div>
+
+---
+
+<div align="center">
   <sub>Koneru Lakshmaiah Education Foundation (KL University) • Computational Foundations of AI</sub>
 </div>
