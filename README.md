@@ -247,7 +247,7 @@ We believe in engineering transparency regarding what is implemented vs simulate
 
 ## 10. Team & Academic Context
 
-Built as the Term-3 Capstone Project for **Computational Foundations of Artificial Intelligence (CFAI)**, Course Code **25SC1306E**, at **KL University (KLEF)**, Vaddeswaram, AP.
+Built as the Term-3 Capstone Project for **Computational Foundations of Artificial Intelligence (CFAI)**, Course Code: **25SC1306E** Semester: **Term-3(1st Year)**, at **KL University (KLEF)**.
 
 | Name | Roll Number | Role |
 |---|---|---|
